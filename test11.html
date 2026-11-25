@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Študijný kútik: Klientske obmedzenia v HTML/JS</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 760px;
+      margin: 2rem auto;
+      padding: 0 1rem 3rem;
+      line-height: 1.5;
+      background: #f6f7f9;
+      color: #1f2937;
+    }
+    .warning {
+      background: #fef3c7;
+      border: 2px solid #d97706;
+      color: #78350f;
+      padding: 1rem 1.25rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+    }
+    .card {
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+    }
+    .secret-box {
+      margin-top: 0.75rem;
+      padding: 0.75rem 1rem;
+      background: #ecfdf5;
+      border: 1px solid #10b981;
+      border-radius: 6px;
+      color: #065f46;
+    }
+    .result {
+      margin-top: 0.75rem;
+      padding: 0.75rem;
+      background: #f3f4f6;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 0.9rem;
+    }
+    button, input {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.95rem;
+      border-radius: 6px;
+      border: 1px solid #cbd5e1;
+    }
+    button {
+      background: #2563eb;
+      color: #fff;
+      border-color: #2563eb;
+      cursor: pointer;
+    }
+    button:disabled {
+      background: #94a3b8;
+      border-color: #94a3b8;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="warning">
+    <strong>UPOZORNENIE (ŠTUDIJNÝ EXPERIMENT):</strong> Táto stránka slúži výhradne na učenie a pochopenie toho, prečo obmedzenia v HTML a klientskom JavaScripte nie sú skutočným zabezpečením. Používaj len na vlastné testovanie.
+  </div>
+
+  <h1>Cvičné klientske „zámky“</h1>
+  <p>Skús si otvoriť nástroje pre vývojárov v prehliadači (<strong>F12</strong> → záložka <em>Elements / Inspector</em> alebo <em>Console</em>) a pozrieť sa, ako sa tieto prvky správajú.</p>
+
+  <!-- 1. Skrytý prvok -->
+  <section class="card">
+    <h2>1. Skrytý prvok v DOM</h2>
+    <p>Text je už v HTML súbore, len je skrytý atribútom <code>hidden</code>.</p>
+    <div id="hiddenNote" class="secret-box" hidden>
+      Cvičný skrytý text: Tento obsah bol v HTML celý čas, prehliadač ho len nezobrazoval.
+    </div>
+  </section>
+
+  <!-- 2. Disabled pole a tlačidlo -->
+  <section class="card">
+    <h2>2. Uzamknutý vstup (<code>disabled</code>)</h2>
+    <p>Pole a tlačidlo sú zablokované atribútom <code>disabled</code>.</p>
+    <input id="lockedInput" type="text" value="predvyplneny_kod" disabled />
+    <button id="lockedBtn" type="button" disabled>Odoslať cvičný kód</button>
+    <div id="lockedOutput" class="result">Zatiaľ neodoslané.</div>
+  </section>
+
+  <!-- 3. Klientska JS kontrola -->
+  <section class="card">
+    <h2>3. Klientska kontrola v JavaScripte</h2>
+    <p>Skript v prehliadači overuje cvičný prístupový kód <code>DEMO-123</code> priamo u používateľa.</p>
+    <input id="codeInput" type="text" placeholder="Zadaj cvičný kód (DEMO-123)" />
+    <button id="checkBtn" type="button">Overiť v JS</button>
+    <div id="jsOutput" class="result">Čakám na zadanie kódu...</div>
+  </section>
+
+  <script>
+    const lockedInput = document.getElementById("lockedInput");
+    const lockedBtn = document.getElementById("lockedBtn");
+    const lockedOutput = document.getElementById("lockedOutput");
+
+    lockedBtn.addEventListener("click", () => {
+      lockedOutput.textContent = "Odoslaná hodnota z poľa: " + lockedInput.value;
+    });
+
+    const codeInput = document.getElementById("codeInput");
+    const checkBtn = document.getElementById("checkBtn");
+    const jsOutput = document.getElementById("jsOutput");
+
+    checkBtn.addEventListener("click", () => {
+      // Ukážka: porovnanie prebieha len v prehliadači, nie na serveri
+      if (codeInput.value.trim() === "DEMO-123") {
+        jsOutput.textContent = "Klientska kontrola prešla (DEMO-123).";
+      } else {
+        jsOutput.textContent = "Neplatný cvičný kód pre klientsku kontrolu.";
+      }
+    });
+  </script>
+</body>
+</html>
