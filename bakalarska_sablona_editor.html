@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Editor šablóny bakalárskej práce</title>
+  <link rel="icon" href="data:," />
+  <style>
+    :root {
+      --bg: #f4f6f9;
+      --card: #ffffff;
+      --border: #d0d7de;
+      --text: #1f2328;
+      --muted: #57606a;
+      --primary: #0969da;
+      --green: #1a7f37;
+      --red: #cf222e;
+      --amber: #9a6700;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 0 0 60px;
+      line-height: 1.5;
+    }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+    }
+    .header-inner {
+      max-width: 1040px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .title-area h1 {
+      font-size: 18px;
+      margin: 0;
+    }
+    .save-status {
+      font-size: 12.5px;
+      color: var(--green);
+      font-weight: 500;
+    }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    button, .file-label {
+      padding: 8px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: opacity 0.15s;
+    }
+    button:hover, .file-label:hover {
+      opacity: 0.9;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+    }
+    .btn-green {
+      background: var(--green);
+      color: #fff;
+    }
+    .btn-gray {
+      background: #f6f8fa;
+      color: var(--text);
+      border-color: var(--border);
+    }
+    .btn-danger {
+      background: #fff0f1;
+      color: var(--red);
+      border-color: #ffcecb;
+    }
+    .btn-sm {
+      padding: 5px 9px;
+      font-size: 12px;
+    }
+    main {
+      max-width: 1040px;
+      margin: 20px auto;
+      padding: 0 16px;
+    }
+    .info-bar {
+      background: #eef4ff;
+      border: 1px solid #b6d4fe;
+      border-left: 4px solid var(--primary);
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 13.5px;
+      margin-bottom: 18px;
+    }
+    .section-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+    .section-card.level-2 {
+      margin-left: 24px;
+      border-left: 4px solid var(--primary);
+    }
+    .section-header {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .section-title-group {
+      display: flex;
+      flex: 1;
+      min-width: 240px;
+      gap: 8px;
+      align-items: center;
+    }
+    .badge {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 3px 7px;
+      border-radius: 4px;
+      background: #f0f3f6;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .badge.main {
+      background: #ddf4ff;
+      color: var(--primary);
+    }
+    .badge.sub {
+      background: #dafbe1;
+      color: var(--green);
+    }
+    .title-input {
+      flex: 1;
+      font-size: 15px;
+      font-weight: 700;
+      padding: 7px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      background: #fbfcfd;
+    }
+    .title-input:focus, .content-textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: #ffffff;
+    }
+    .section-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .content-textarea {
+      width: 100%;
+      min-height: 110px;
+      padding: 10px 12px;
+      font-family: inherit;
+      font-size: 14px;
+      line-height: 1.55;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      resize: vertical;
+      color: var(--text);
+      background: #ffffff;
+    }
+    .add-panel {
+      background: #ffffff;
+      border: 2px dashed var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-backdrop.open {
+      display: flex;
+    }
+    .modal {
+      background: #fff;
+      border-radius: 10px;
+      max-width: 640px;
+      width: 100%;
+      padding: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+    .modal h2 {
+      margin-top: 0;
+      font-size: 18px;
+    }
+    .modal textarea {
+      width: 100%;
+      min-height: 220px;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 13.5px;
+      margin: 10px 0;
+    }
+    @media (max-width: 640px) {
+      .section-card.level-2 {
+        margin-left: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="title-area">
+      <h1>Šablóna bakalárskej práce (SPU Nitra)</h1>
+      <div id="saveStatus" class="save-status">Automaticky uložené v prehliadači</div>
+    </div>
+    <div class="toolbar">
+      <button type="button" class="btn-gray" onclick="openImportModal()">Vložiť text / Import</button>
+      <label class="file-label btn-gray" for="docxImportInput">Načítať .docx / .txt</label>
+      <input id="docxImportInput" type="file" accept=".docx,.txt,.md,.json" style="display:none" onchange="handleFileImport(event)" />
+      <button type="button" class="btn-primary" onclick="downloadTxt()">Stiahnuť .txt</button>
+      <button type="button" class="btn-green" onclick="downloadWordDoc()">Stiahnuť Word (.doc)</button>
+      <button type="button" class="btn-danger" onclick="clearAllContent()">Vymazať celé</button>
+      <button type="button" class="btn-gray" onclick="resetToDefaultTemplate()">Obnoviť pôvodnú šablónu</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="info-bar">
+    <strong>Ako to funguje:</strong> Každá časť, kapitola aj podkapitola je samostatná položka. Môžeš ľubovoľne meniť názvy, dopisovať text, pridávať nové položky, presúvať ich hore/dole alebo ich mazať. Všetko sa <strong>automaticky ukladá</strong> priamo v prehliadači.
+  </div>
+
+  <div id="sectionsContainer"></div>
+
+  <div class="add-panel">
+    <button type="button" class="btn-primary" onclick="addSection('intro')">+ Pridať úvodnú / povinnú položku</button>
+    <button type="button" class="btn-primary" onclick="addSection('main')">+ Pridať hlavnú kapitolu</button>
+    <button type="button" class="btn-green" onclick="addSection('sub')">+ Pridať podkapitolu</button>
+  </div>
+</main>
+
+<!-- Modal pre vloženie textu -->
+<div id="importModal" class="modal-backdrop">
+  <div class="modal">
+    <h2>Vložiť celý text alebo nahradiť obsah</h2>
+    <p style="font-size:13.5px; color:#57606a; margin:0;">Vlož ľubovoľný text (napr. skopírovaný z Wordu). Môžeš ho vložiť ako novú položku alebo ním nahradiť aktuálny obsah.</p>
+    <textarea id="pasteImportArea" placeholder="Sem vlož text..."></textarea>
+    <div style="display:flex; gap:8px; justify-content:flex-end; flex-wrap:wrap;">
+      <button type="button" class="btn-gray" onclick="closeImportModal()">Zrušiť</button>
+      <button type="button" class="btn-primary" onclick="importAsNewBlock()">Pridať ako novú položku</button>
+      <button type="button" class="btn-green" onclick="replaceWithPastedText()">Nahradiť celý dokument týmto textom</button>
+    </div>
+  </div>
+</div>
+
+<!-- Knižnica mammoth.js pre čítanie .docx súborov priamo v prehliadači -->
+<script src="https://unpkg.com/mammoth@1.8.0/mammoth.browser.min.js"></script>
+
+<script>
+  const STORAGE_KEY = "erik_bc_template_v1";
+
+  const DEFAULT_SECTIONS = [
+    {
+      id: "obal",
+      type: "intro",
+      title: "Obal / Titulný list 1",
+      content: "SLOVENSKÁ POĽNOHOSPODÁRSKA UNIVERZITA V NITRE\nTECHNICKÁ FAKULTA\nIdentifikačné číslo: TF-102486-93107\n\nMožnosti využitia termických analýz pri predikcii motorových olejov\nBakalárska práca\n\n2027                                                    Erik Mohylák"
+    },
+    {
+      id: "titulny2",
+      type: "intro",
+      title: "Titulný list 2",
+      content: "SLOVENSKÁ POĽNOHOSPODÁRSKA UNIVERZITA V NITRE\nTECHNICKÁ FAKULTA\n\nMožnosti využitia termických analýz pri predikcii motorových olejov\nBakalárska práca\n\nŠtudijný program: Výrobné techniky a riadiace systémy\nŠtudijný odbor: Strojárstvo\nPracovisko: Ústav elektrotechniky, automatizácie, informatiky a fyziky\nVedúci práce/školiteľ: Mgr. Daniela Kunecová, PhD.\n\nNitra 2027                                              Erik Mohylák"
+    },
+    {
+      id: "prehlasenie",
+      type: "intro",
+      title: "Čestné prehlásenie",
+      content: "Súhlasím, že túto záverečnú prácu som vypracoval(a) sám/sama. Všetky použité literatúrne pramene som uviedol(a) v zozname použitých prameňov.\n\n...............................................................\npodpis študenta/autora"
+    },
+    {
+      id: "podakovanie",
+      type: "intro",
+      title: "Poďakovanie",
+      content: "Rád by som sa poďakoval Mgr. Daniele Kunecovej, PhD. za jej odborné vedenie, ochotu a cenné rady pri vypracovaní tejto práce.\nTaktiež ďakujem za jej čas a pomoc pri spracovaní práce."
+    },
+    {
+      id: "abstrakt_sk",
+      type: "intro",
+      title: "Abstrakt a Kľúčové slová",
+      content: "Táto bakalárska práca sa venuje možnostiam využitia termických analýz pri hodnotení a predikcii spracovania použitých motorových olejov. Cieľom práce je navrhnúť možnosti použitia týchto analýz pri online monitorovaní olejov počas výrobných procesov. V teoretickej časti sú spracované základné poznatky o vlastnostiach olejov a ich správaní pri zmene teploty.\n\nPraktická časť je zameraná na určenie charakteristických teplôt, najmä teploty skleného prechodu a teploty topenia jednotlivých zložiek obsiahnutých v olejoch. Na tento účel sú použité metódy porovnávacej kompenzačnej kalorimetrie a termogravimetrickej analýzy, ktoré umožňujú presnejšie určiť tepelnú stabilitu a zloženie skúmaných vzoriek.\n\nZískané výsledky poukazujú na význam sledovania teplotných parametrov pri spracovaní olejov, pretože tieto procesy sú na zmeny teploty výrazne citlivé. Správne nastavenie technologických podmienok môže prispieť k efektívnejšiemu spracovaniu olejov napríklad pri vstrekovaní, vytláčaní alebo odlievaní. Výsledkom práce je návrh využitia termických analýz ako nástroja pre optimalizáciu výrobných procesov v priemyselnej praxi.\n\nKľúčové slová: termická analýza, motorové oleje, DSC, TGA, teplota skleného prechodu, teplota topenia, spracovanie materiálov, tepelná stabilita"
+    },
+    {
+      id: "abstract_en",
+      type: "intro",
+      title: "Abstract and Keywords",
+      content: "This bachelor thesis deals with the application of thermal analysis in the evaluation and prediction of the processing of used motor oils. The main aim of the thesis is to propose possibilities for the application of these methods in online monitoring of oils during production processes. The theoretical part focuses on fundamental knowledge about the properties of oils and their behaviour under changing temperature conditions.\n\nThe practical part is focused on determining characteristic temperatures, especially the glass transition temperature and the melting temperature of individual components contained in oils. For this purpose, comparative compensation calorimetry and thermogravimetric analysis are used, which allow more precise determination of thermal stability and composition of the examined samples.\n\nThe obtained results highlight the importance of monitoring temperature parameters during oil processing, as these processes are highly sensitive to temperature changes. Proper adjustment of technological conditions can contribute to more efficient oil processing, for example in injection moulding, extrusion, or casting processes. The outcome of the thesis is a proposal for the use of thermal analysis as a tool for optimisation of production processes in industrial practice.\n\nKeywords: thermal analysis, motor oils, DSC, TGA, glass transition temperature, melting temperature, material processing, thermal stability"
+    },
+    {
+      id: "skratky",
+      type: "intro",
+      title: "Zoznam skratiek a značiek",
+      content: "DSC – diferenciálna skenovacia kalorimetria\nTGA – termogravimetrická analýza\n°C – stupeň Celzia\nmg – miligram"
+    },
+    {
+      id: "uvod",
+      type: "main",
+      title: "Úvod",
+      content: "Motorové oleje a použité oleje sú dôležitou skupinou materiálov, ktoré sa v priemyselnej praxi používajú pri rôznych technologických procesoch. Ich vlastnosti sú výrazne ovplyvnené chemickým zložením a teplotnými podmienkami, ktoré ich sprevádzajú počas spracovania. Preto je dôležité poznať ich tepelné správanie a možnosti jeho predikcie pomocou vhodných analytických metód.\n\nTermické analýzy patria medzi základné nástroje, ktoré sa používajú na štúdium fyzikálnych a chemických zmien materiálov v závislosti od teploty. Medzi najpoužívanejšie metódy patrí diferenciálna skenovacia kalorimetria (DSC), ktorá umožňuje sledovať tepelné prechody v materiáli, a termogravimetrická analýza (TGA), ktorá poskytuje informácie o zmene hmotnosti v závislosti od teploty (HAINES 2012).\n\nTieto metódy majú využitie aj pri hodnotení olejov, kde je dôležité sledovať ich tepelnú stabilitu a správanie jednotlivých zložiek pri zvýšených teplotách. Správne interpretovanie výsledkov termických analýz môže pomôcť optimalizovať spracovateľské procesy, ako sú vstrekovanie, vytláčanie alebo odlievanie, ktoré sú na teplotných podmienkach výrazne závislé (BROWN 2001)."
+    },
+    {
+      id: "kap1",
+      type: "main",
+      title: "1. Prehľad o súčasnom stave riešenej problematiky",
+      content: "V súčasnosti predstavujú termické analýzy dôležitú súčasť hodnotenia vlastností materiálov v priemyselnej praxi. Metódy ako diferenciálna skenovacia kalorimetria (DSC) a termogravimetrická analýza (TGA) sa využívajú pri štúdiu tepelných vlastností rôznych organických a polymérnych materiálov vrátane motorových olejov.\n\nMotorové oleje sú počas používania vystavené vysokému tepelnému a mechanickému zaťaženiu, čo ovplyvňuje ich chemické zloženie, tepelnú stabilitu a spracovateľnosť. Preto je dôležité sledovať ich správanie pri zmenách teploty a identifikovať charakteristické teplotné prechody.\n\nPoznatky získané pomocou termických analýz majú využitie pri optimalizácii technologických procesov, kontrole kvality materiálov a návrhu efektívnejších spôsobov spracovania použitých motorových olejov."
+    },
+    {
+      id: "kap1_1",
+      type: "sub",
+      title: "1.1 Riešenie problematiky",
+      content: "Riešením tejto problematiky je využitie termických analytických metód, najmä diferenciálnej skenovacej kalorimetrie (DSC) a termogravimetrickej analýzy (TGA), ktoré umožňujú detailné sledovanie tepelných a hmotnostných zmien motorových olejov.\n\nKombináciou týchto metód je možné presnejšie určiť teplotné prechody, degradáciu materiálu a jeho tepelnú stabilitu. Získané informácie následne umožňujú lepšie pochopenie správania olejov pri tepelnom zaťažení.\n\nVýsledky analýz môžu byť použité pri optimalizácii technologických procesov spracovania olejov a pri zlepšení kontroly ich kvality v priemyselnej praxi."
+    },
+    {
+      id: "kap1_2",
+      type: "sub",
+      title: "1.2 Tepelné správanie motorových olejov",
+      content: "Na základe dostupnej literatúry možno konštatovať, že motorové oleje vykazujú komplexné tepelné správanie, ktoré je výrazne ovplyvnené ich chemickým zložením (HAINES 2012). Pri zvýšení teploty dochádza najprv k postupným fyzikálnym zmenám, ako je znižovanie viskozity, a následne k chemickým degradačným procesom.\n\nLiterárne zdroje uvádzajú, že prvé významné zmeny štruktúry sa môžu prejavovať už pri relatívne nízkych teplotách, pričom stabilita materiálu závisí od obsahu prísad a stupňa degradácie oleja počas používania (HAINES 2012)."
+    },
+    {
+      id: "kap1_3",
+      type: "sub",
+      title: "1.3 Termická analýza pomocou DSC a TGA",
+      content: "Diferenciálna skenovacia kalorimetria (DSC) umožňuje identifikovať teploty fázových prechodov, ako je teplota skleného prechodu alebo exotermické a endotermické procesy (BROWN 2001). Termogravimetrická analýza (TGA) je využívaná na sledovanie úbytku hmotnosti materiálu v závislosti od teploty, čo umožňuje určiť teplotu začiatku degradácie.\n\nPodľa odborných štúdií je kombinácia DSC a TGA vhodná na komplexné hodnotenie tepelných vlastností olejov, pretože umožňuje sledovať tak energetické, ako aj hmotnostné zmeny materiálu (BROWN 2001). Tieto metódy sú zároveň široko využívané aj pri analýze polymérnych materiálov a organických zlúčenín (HAINES 2012).\n\n[Miesto pre Obrázok 1 – DSC krivka polyméru (EAG Laboratories 2016)]\n[Miesto pre Obrázok 2 – Príklad TGA krivky a jej interpretácia (Torontech 2025)]"
+    },
+    {
+      id: "kap1_4",
+      type: "sub",
+      title: "1.4 Predpokladané teplotné charakteristiky olejov",
+      content: "Na základe literatúry možno predpokladať nasledujúce charakteristické teplotné oblasti správania motorových olejov (HAINES 2012):\n\n- do 100 °C: odparovanie ľahkých frakcií (zmena viskozity)\n- 100 – 250 °C: stabilná oblasť (použiteľná pri spracovaní)\n- 250 – 400 °C: začiatok degradácie (rozpad organických zložiek)\n- nad 400 °C: výrazná degradácia (tvorba plynných produktov)"
+    },
+    {
+      id: "kap1_5",
+      type: "sub",
+      title: "1.5 Porovnanie metód DSC a TGA",
+      content: "Na základe dostupných zdrojov je možné porovnať jednotlivé termické metódy nasledovne (BROWN 2001):\n\n- DSC | Sledovaný parameter: teplo, entalpia | Výstup: teplotné prechody | Využitie: fázové zmeny\n- TGA | Sledovaný parameter: hmotnosť vzorky | Výstup: úbytok hmotnosti | Využitie: tepelná stabilita"
+    },
+    {
+      id: "kap1_6",
+      type: "sub",
+      title: "1.6 Využitie v priemyselnej praxi",
+      content: "Výsledky termických analýz majú významné uplatnenie v priemyselných procesoch, kde je potrebná presná kontrola teploty. Najmä pri spracovaní olejov (napr. filtrácia, regenerácia alebo recyklácia olejov) je dôležité poznať teplotné limity, pri ktorých dochádza k degradácii materiálu.\n\nNa základe literárnych zdrojov možno konštatovať, že implementácia DSC a TGA analýz do výrobného procesu umožňuje lepšiu optimalizáciu technologických parametrov a zníženie strát materiálu (Abdelkhalik et al. 2017). Využitie termických analýz v priemyselnej praxi je predmetom viacerých odborných štúdií a aplikácií (BROWN 2001).\n\n[Miesto pre Obrázok 3 – Schéma využitia termických analýz v spracovaní olejov (Imgur 2026)]"
+    },
+    {
+      id: "kap1_7",
+      type: "sub",
+      title: "1.7 Tepelná degradácia motorových olejov",
+      content: "Pri dlhodobom tepelnom zaťažení dochádza v motorových olejoch k postupnej degradácii ich základových aj prídavných zložiek. Tento proces je ovplyvnený najmä teplotou, prítomnosťou kyslíka a dobou pôsobenia tepelného namáhania. Tepelná degradácia sa prejavuje zmenou fyzikálnych vlastností oleja, zvýšením viskozity a tvorbou degradačných produktov (SANTOS et al. 2004).\n\nVýznamným faktorom je aj oxidačná stabilita olejov, ktorá ovplyvňuje ich životnosť a schopnosť zachovať si požadované mazacie vlastnosti. Termické analytické metódy umožňujú sledovať priebeh degradačných procesov a identifikovať teplotné oblasti, pri ktorých dochádza k najvýznamnejším zmenám materiálu (MARTIN 2000).\n\nNa základe odborných štúdií možno konštatovať, že správna identifikácia degradačných procesov je dôležitá pre optimalizáciu technologických podmienok spracovania a ďalšieho využitia použitých motorových olejov (KODALI 2002)."
+    },
+    {
+      id: "kap1_8",
+      type: "sub",
+      title: "1.8 Oxidačná stabilita a životnosť olejov",
+      content: "Oxidačná stabilita patrí medzi základné vlastnosti motorových olejov, pretože výrazne ovplyvňuje ich prevádzkovú životnosť a odolnosť voči tepelnému zaťaženiu. Pri vysokých teplotách dochádza k oxidácii organických zložiek oleja, čo môže viesť k tvorbe usadenín, kalov a ďalších nežiaducich produktov degradácie (AHMAD et al. 2022).\n\nMetódy DSC a TGA umožňujú sledovať priebeh oxidačných reakcií a stanoviť charakteristické teploty, pri ktorých dochádza k zníženiu stability materiálu. Tieto informácie sú významné najmä pri návrhu technologických procesov a hodnotení kvality použitých olejov (GIAVARINI 1981).\n\nZ odborných publikácií vyplýva, že vhodná kombinácia termických analýz umožňuje efektívnejšie predikovať správanie olejov počas ich ďalšieho spracovania a zároveň znižovať riziko tepelných poškodení materiálu (WU et al. 2020)."
+    },
+    {
+      id: "kap1_9",
+      type: "sub",
+      title: "1.9 Význam termických analýz pri kontrole kvality",
+      content: "Termické analýzy predstavujú významný nástroj kontroly kvality materiálov v priemyselnej praxi. Pri spracovaní motorových olejov umožňujú sledovanie zmien fyzikálnych a chemických vlastností materiálu počas technologických procesov. Výsledky analýz môžu slúžiť na optimalizáciu výrobných podmienok a znižovanie materiálových strát (GARCÍA et al. 2000).\n\nDiferenciálna skenovacia kalorimetria poskytuje údaje o energetických zmenách materiálu, zatiaľ čo termogravimetrická analýza umožňuje zaznamenávať úbytok hmotnosti v závislosti od teploty. Kombinácia týchto metód umožňuje presnejšie posúdenie kvality skúmaných vzoriek (SÁNCHEZ et al. 1997).\n\nIntegrácia termických analýz do priemyselných procesov môže prispieť k zvýšeniu efektivity výroby, lepšiemu monitorovaniu spracovania olejov a presnejšiemu kontrolovaniu technologických parametrov."
+    },
+    {
+      id: "kap2",
+      type: "main",
+      title: "2. Cieľ práce",
+      content: "Cieľom tejto bakalárskej práce je analyzovať možnosti aplikácie termických analýz pri posudzovaní a predikcii spracovania použitých motorových olejov. Práca sa zaoberá sledovaním tepelných vlastností olejov a identifikovaním charakteristických teplotných zmien, ktoré ovplyvňujú ich spracovateľnosť, tepelnú stabilitu a ďalšie využitie v priemyselnej praxi.\n\nSúčasťou práce je spracovanie teoretických poznatkov o tepelnom správaní motorových olejov, ich chemickom zložení a degradačných procesoch, ktoré nastávajú pri tepelnom zaťažení. Pozornosť je venovaná najmä metódam termickej analýzy, konkrétne diferenciálnej skenovacej kalorimetrii (DSC) a termogravimetrickej analýze (TGA), ktoré patria medzi významné analytické metódy, používané pri posudzovaní fyzikálnych a chemických zmien materiálov v závislosti od teploty.\n\nCieľom práce je tiež stanovenie charakteristických teplôt, predovšetkým teploty skleného prechodu, teploty topenia a teploty začiatku degradácie jednotlivých zložiek, ktoré sú obsiahnuté v použitých motorových olejoch. Tieto parametre poskytujú dôležité informácie o tepelnom správaní materiálu a o jeho vhodnosti pre ďalšie technologické spracovanie.\n\nPraktická časť práce sa zameriava na použitie termických analýz pri posudzovaní tepelných vlastností skúmaných vzoriek olejov a na interpretáciu získaných výsledkov. Na základe nameraných údajov bude možné posúdiť tepelnú stabilitu materiálov a identifikovať významné teplotné oblasti, ktoré ovplyvňujú ich spracovanie.\n\nĎalším cieľom práce je poukázať na možnosti využitia termických analýz pri optimalizácii technologických procesov, ako sú vstrekovanie, vytláčanie alebo odlievanie materiálov, pri ktorých teplota zohráva významnú úlohu. Získané poznatky môžu prispieť k efektívnejšiemu riadeniu výrobných procesov, k znižovaniu materiálových strát a k zlepšeniu kontroly kvality olejov v priemyselnej praxi.\n\nPráca sa tiež zameriava na návrh možností aplikácie termických analýz pri online monitorovaní olejov počas výrobných procesov, čo môže predstavovať významný prínos pre moderné priemyselné technológie a automatizované systémy kontroly kvality."
+    },
+    {
+      id: "kap3",
+      type: "main",
+      title: "3. Materiál a metódy",
+      content: "V rámci spracovania tejto práce boli využité poznatky z oblasti tepelných vlastností motorových olejov a metód ich analýzy. Práca má kompilačný charakter a zameriava sa na spracovanie dostupných informácií o tepelnom správaní motorových olejov a olejových zvyškov. Pozornosť je venovaná najmä zmenám, ktoré nastávajú pri pôsobení zvýšených teplôt a ktoré môžu ovplyvňovať vlastnosti a stabilitu skúmaných materiálov.\n\nAko hlavné metódy hodnotenia tepelných vlastností materiálov boli vybrané diferenciálna skenovacia kalorimetria (DSC) a termogravimetrická analýza (TGA). Tieto metódy umožňujú sledovať zmeny v materiáli v závislosti od teploty a poskytujú informácie o jeho tepelnom správaní."
+    },
+    {
+      id: "kap3_1",
+      type: "sub",
+      title: "3.1 Diferenciálna skenovacia kalorimetria (DSC)",
+      content: "Diferenciálna skenovacia kalorimetria je jedna z najvýznamnejších metód termickej analýzy materiálov. Princíp metódy spočíva v meraní rozdielu tepelného toku medzi skúmanou vzorkou a referenčným materiálom pri riadenom zahrievaní alebo ochladzovaní. Výsledkom analýzy je DSC krivka, na ktorej možno identifikovať jednotlivé tepelné prechody materiálu (HAINES 2012).\n\nMetóda DSC sa používa najmä na stanovenie teploty skleného prechodu, teploty topenia, kryštalizácie a ďalších endotermických alebo exotermických procesov. Pri analýze použitých motorových olejov umožňuje sledovanie zmien spôsobených tepelným zaťažením a degradáciou jednotlivých zložiek (SÁNCHEZ et al. 1997)."
+    },
+    {
+      id: "kap3_2",
+      type: "sub",
+      title: "3.2 Termogravimetrická analýza (TGA)",
+      content: "Termogravimetrická analýza je metóda, ktorá je založená na sledovaní zmien hmotnosti vzorky počas jej zahrievania v definovaných podmienkach. Získané údaje umožňujú určiť teplotnú stabilitu materiálu, priebeh degradácie a množstvo zvyškového materiálu po tepelnom zaťažení (GIAVARINI 1981).\n\nPri hodnotení použitých motorových olejov je TGA významná najmä z dôvodu možnosti sledovania rozkladu organických zložiek a identifikácie teplôt, pri ktorých dochádza k najvýraznejším zmenám materiálu (KODALI 2002; WU et al. 2020)."
+    },
+    {
+      id: "kap3_3",
+      type: "sub",
+      title: "3.3 Hodnotené parametre termických analýz",
+      content: "Pri termických analýzach motorových olejov sa sleduje viacero charakteristických parametrov, ktoré poskytujú informácie o tepelnom správaní materiálu. Medzi najvýznamnejšie patria teplota skleného prechodu, teplota topenia, teplota začiatku degradácie a priebeh úbytku hmotnosti vzorky počas zahrievania (HAINES 2012).\n\nDôležitým parametrom je aj oxidačná stabilita materiálu, ktorá ovplyvňuje jeho životnosť a spracovateľnosť (AHMAD et al. 2022)."
+    },
+    {
+      id: "kap3_4",
+      type: "sub",
+      title: "3.4 Využitie termických analýz v priemyselných aplikáciách",
+      content: "Termické analytické metódy sa uplatňujú v rôznych oblastiach priemyslu, najmä pri hodnotení kvality materiálov a kontrole technologických procesov (MARTIN 2000; GARCÍA et al. 2000). Na základe odborných štúdií možno konštatovať, že termické analýzy predstavujú významný nástroj moderného priemyslu a ich uplatnenie sa neustále rozširuje aj v oblasti spracovania použitých motorových olejov."
+    },
+    {
+      id: "kap4",
+      type: "main",
+      title: "4. Výsledky práce",
+      content: "[Sem dopíš svoje namerané výsledky, grafy, tabuľky a vyhodnotenie DSC / TGA analýz...]"
+    },
+    {
+      id: "kap5",
+      type: "main",
+      title: "5. Diskusia",
+      content: "Na základe vykonaných experimentálnych meraní a spracovaných literárnych zdrojov je možné konštatovať, že termické analýzy predstavujú efektívny nástroj na hodnotenie tepelných vlastností použitých motorových olejov. Metódy DSC a TGA umožnili identifikovať charakteristické teplotné prechody a zmeny hmotnosti, ktoré súvisia s tepelnou degradáciou skúmaných vzoriek.\n\nZískané výsledky experimentálnej časti ukazujú, že správanie použitých motorových olejov sa výrazne líši od hodnotených údajov, ktoré sú uvedené v literatúre pre nové oleje. Tento rozdiel je spôsobený najmä stupňom degradácie, kontamináciou a oxidáciou počas používania.\n\nPorovnanie experimentálnych výsledkov s odbornými zdrojmi potvrdzuje, že DSC krivky vykazujú posun teplotných prechodov smerom k nižším hodnotám, čo súvisí so zníženou tepelnou stabilitou použitých olejov. Rovnako TGA analýza ukazuje rýchlejší úbytok hmotnosti, čo naznačuje nižšiu odolnosť voči tepelnému zaťaženiu.\n\nZ hľadiska priemyselnej praxe tieto výsledky potvrdzujú význam monitorovania stavu použitých olejov, keďže ich degradácia má priamy vplyv na ich ďalšie spracovanie a recykláciu."
+    },
+    {
+      id: "zaver",
+      type: "main",
+      title: "Záver",
+      content: "Cieľom tejto bakalárskej práce bolo navrhnúť a opísať možnosti využitia termických analýz pri hodnotení a predikcii spracovania použitých motorových olejov. V rámci práce boli spracované teoretické poznatky a zároveň boli vykonané experimentálne merania pomocou metód DSC a TGA.\n\nNa základe získaných výsledkov bolo preukázané, že použité motorové oleje vykazujú zmenené tepelné správanie v porovnaní s literárnymi údajmi pre nové oleje, čo je spôsobené najmä ich degradáciou počas používania. DSC a TGA analýzy umožnili identifikovať charakteristické teplotné zmeny a úbytok hmotnosti, ktoré potvrdzujú nižšiu tepelnú stabilitu použitých olejov.\n\nVýsledky práce potvrdzujú, že termické analytické metódy predstavujú efektívny nástroj na hodnotenie kvality a správania použitých motorových olejov. Získané poznatky môžu byť použité pri optimalizácii ich spracovania, regenerácie a pri zlepšení technologických procesov v priemyselnej praxi."
+    },
+    {
+      id: "literatura",
+      type: "intro",
+      title: "Zoznam použitej literatúry",
+      content: "ABDELKHALIK, A., ELSAYED, H., HASSAN, M. A., et al. 2017. Using thermal analysis techniques for identifying the flash point temperatures of some lubricant and base oils. Egyptian Journal of Petroleum, 27(1), s. 131–136. DOI: 10.1016/j.ejpe.2017.02.006.\nAHMAD, I., et al. 2022. Antioxidant performance of bio-oils in oxidative stability of base lubricating oil determined through TGA and PDSC techniques. Thermochimica Acta, 713, 179241. DOI: 10.1016/j.tca.2022.179241.\nBROWN, M. E. 2001. Introduction to Thermal Analysis: Techniques and Applications. Dordrecht: Springer.\nEAG Laboratories. 2016. Characterization of polymers using differential scanning calorimetry (DSC) [online]. Dostupné na: https://www.eag.com/wp-content/uploads/2016/10/white-paper-characterization-of-polymers-using-differential-scanning-calorimetry-DSC-M-012816_Figure_1e.jpg [cit. 2026-04-17].\nGARCÍA, M., et al. 2000. Physico-chemical characterization of base stocks and thermal analysis by differential scanning calorimetry and thermomicroscopy at low temperature. Thermochimica Acta, 348(1–2), s. 147–159. DOI: 10.1016/S0040-6031(00)00349-X.\nGIAVARINI, C. 1981. Thermal analysis of petroleum products. Thermochimica Acta, 46(1), s. 21–45. DOI: 10.1016/0040-6031(81)85074-5.\nHAINES, P. J. 2012. Principles of Thermal Analysis and Calorimetry. Cambridge: Royal Society of Chemistry.\nImgur. 2026. Schéma využitia termických analýz v priemyselnom spracovaní olejov [online]. Dostupné na: https://i.imgur.com/OMWHkTC.jpeg [cit. 2026-04-17].\nKODALI, D. R. 2002. Evaluation of kinetic parameters of thermal and oxidative decomposition of base oils by conventional, isothermal and modulated TGA, and pressure DSC. Thermochimica Acta, 392–393, s. 357–369. DOI: 10.1016/S0040-6031(02)00121-1.\nMACKNIGHT, W. J. 1972. Thermal Analysis of Lubricating Oils. Thermochimica Acta, 4(3–5), s. 377–392. DOI: 10.1016/0040-6031(72)87019-9.\nMARTIN, J. M. 2000. Oxidative properties of lubricants using thermal analysis. Thermochimica Acta, 357–358, s. 47–56. DOI: 10.1016/S0040-6031(00)00367-1.\nSÁNCHEZ, R., et al. 1997. Characterization of oils by differential scanning calorimetry. Thermochimica Acta, 306(1–2), s. 127–130. DOI: 10.1016/S0040-6031(97)00312-2.\nSANTOS, J. C. O., et al. 2004. Thermoanalytical and rheological characterization of automotive mineral lubricants after thermal degradation. Fuel, 83(17–18), s. 2393–2399. DOI: 10.1016/j.fuel.2004.06.016.\nTorontech. 2025. Reading and interpreting the TGA curve [online]. Dostupné na: https://torontech.com/wp-content/uploads/2025/05/Reading-and-Interpreting-the-TGA-Curve.webp [cit. 2026-04-17].\nWU, Y., et al. 2020. Thermogravimetric evaluation of the effect of LiBF4 on the thermal stability of three engine lubricants. Journal of Molecular Liquids, 297, 111842. DOI: 10.1016/j.molliq.2019.111842."
+    },
+    {
+      id: "prilohy",
+      type: "intro",
+      title: "Prílohy",
+      content: "Príloha A – DSC krivka\nObrázok 1 – DSC krivka polyméru (EAG Laboratories, 2016)\n\nPríloha B – TGA krivka\nObrázok 2 – TGA krivka a jej interpretácia (Torontech, 2025)\n\nPríloha C – Schéma procesu spracovania olejov\nObrázok 3 – Schéma využitia termických analýz (Imgur, 2026)"
+    }
+  ];
+
+  let sections = [];
+  const container = document.getElementById("sectionsContainer");
+  const saveStatus = document.getElementById("saveStatus");
+
+  function loadSections() {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          sections = parsed;
+          return;
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    sections = JSON.parse(JSON.stringify(DEFAULT_SECTIONS));
+  }
+
+  function saveSections() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(sections));
+      const now = new Date().toLocaleTimeString("sk-SK");
+      saveStatus.textContent = "Automaticky uložené (" + now + ")";
+    } catch (e) {
+      saveStatus.textContent = "Chyba ukladania do prehliadača";
+    }
+  }
+
+  function getTypeLabel(type) {
+    if (type === "main") return { text: "Hlavná kapitola", cls: "main" };
+    if (type === "sub") return { text: "Podkapitola", cls: "sub" };
+    return { text: "Úvodná / Záverečná časť", cls: "" };
+  }
+
+  function renderSections() {
+    container.innerHTML = "";
+    if (sections.length === 0) {
+      container.innerHTML = '<div class="section-card" style="text-align:center; color:#57606a;">Dokument je momentálne prázdny. Pridaj položku tlačidlami nižšie alebo vlož text / načítaj súbor.</div>';
+      return;
+    }
+
+    sections.forEach((sec, index) => {
+      const card = document.createElement("div");
+      card.className = "section-card" + (sec.type === "sub" ? " level-2" : "");
+
+      const badgeInfo = getTypeLabel(sec.type);
+
+      card.innerHTML = `
+        <div class="section-header">
+          <div class="section-title-group">
+            <span class="badge ${badgeInfo.cls}">${badgeInfo.text}</span>
+            <input type="text" class="title-input" value="${escapeHtml(sec.title)}" oninput="updateTitle(${index}, this.value)" placeholder="Názov kapitoly / položky..." />
+          </div>
+          <div class="section-actions">
+            <button type="button" class="btn-gray btn-sm" onclick="toggleType(${index})" title="Zmeniť typ položky">Typ</button>
+            <button type="button" class="btn-gray btn-sm" onclick="moveSection(${index}, -1)" ${index === 0 ? "disabled" : ""}>↑</button>
+            <button type="button" class="btn-gray btn-sm" onclick="moveSection(${index}, 1)" ${index === sections.length - 1 ? "disabled" : ""}>↓</button>
+            <button type="button" class="btn-primary btn-sm" onclick="insertBelow(${index}, 'sub')">+ Podkapitola</button>
+            <button type="button" class="btn-danger btn-sm" onclick="deleteSection(${index})">Zmazať</button>
+          </div>
+        </div>
+        <textarea class="content-textarea" oninput="updateContent(${index}, this.value)" placeholder="Sem píš alebo vlož text tejto časti...">${escapeHtml(sec.content)}</textarea>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  function escapeHtml(str) {
+    return String(str || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function updateTitle(index, val) {
+    sections[index].title = val;
+    saveSections();
+  }
+
+  function updateContent(index, val) {
+    sections[index].content = val;
+    saveSections();
+  }
+
+  function toggleType(index) {
+    const order = ["intro", "main", "sub"];
+    const next = order[(order.indexOf(sections[index].type) + 1) % order.length];
+    sections[index].type = next;
+    saveSections();
+    renderSections();
+  }
+
+  function moveSection(index, dir) {
+    const target = index + dir;
+    if (target < 0 || target >= sections.length) return;
+    const temp = sections[index];
+    sections[index] = sections[target];
+    sections[target] = temp;
+    saveSections();
+    renderSections();
+  }
+
+  function addSection(type) {
+    const title = type === "main" ? "Nová hlavná kapitola" : (type === "sub" ? "Nová podkapitola" : "Nová položka");
+    sections.push({
+      id: "sec_" + Date.now(),
+      type,
+      title,
+      content: ""
+    });
+    saveSections();
+    renderSections();
+  }
+
+  function insertBelow(index, type) {
+    sections.splice(index + 1, 0, {
+      id: "sec_" + Date.now(),
+      type,
+      title: "Nová podkapitola",
+      content: ""
+    });
+    saveSections();
+    renderSections();
+  }
+
+  function deleteSection(index) {
+    if (!confirm("Naozaj chceš vymazať položku „" + sections[index].title + "“?")) return;
+    sections.splice(index, 1);
+    saveSections();
+    renderSections();
+  }
+
+  function clearAllContent() {
+    if (!confirm("Naozaj chceš vymazať celý obsah dokumentu, aby si mohol začať načisto?")) return;
+    sections = [];
+    saveSections();
+    renderSections();
+  }
+
+  function resetToDefaultTemplate() {
+    if (!confirm("Obnoviť pôvodnú šablónu bakalárskej práce so všetkými kapitolami?")) return;
+    sections = JSON.parse(JSON.stringify(DEFAULT_SECTIONS));
+    saveSections();
+    renderSections();
+  }
+
+  function openImportModal() {
+    document.getElementById("pasteImportArea").value = "";
+    document.getElementById("importModal").classList.add("open");
+  }
+
+  function closeImportModal() {
+    document.getElementById("importModal").classList.remove("open");
+  }
+
+  function parseRawTextToSections(rawText) {
+    const lines = rawText.split(/\r?\n/);
+    const result = [];
+    let current = null;
+
+    const headingRegex = /^(\d+\.\d+\s+.+|\d+\.\s*.+|Úvod|Záver|Abstrakt|Abstract|Poďakovanie|Čestné prehlásenie|Zoznam skratiek.*|Zoznam použitej literatúry|Prílohy|PRÍLOHY|ZÁVER|4\s+VÝSLEDKY PRÁCE)$/i;
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (headingRegex.test(trimmed)) {
+        if (current) result.push(current);
+        const isSub = /^\d+\.\d+/.test(trimmed);
+        const isMain = /^\d+\./.test(trimmed) || /^(Úvod|Záver|ZÁVER|4\s+VÝSLEDKY PRÁCE)$/i.test(trimmed);
+        current = {
+          id: "imp_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
+          type: isSub ? "sub" : (isMain ? "main" : "intro"),
+          title: trimmed,
+          content: ""
+        };
+      } else {
+        if (!current) {
+          current = {
+            id: "imp_" + Date.now(),
+            type: "intro",
+            title: "Vložený text",
+            content: ""
+          };
+        }
+        current.content += (current.content ? "\n" : "") + line;
+      }
+    }
+    if (current) result.push(current);
+    return result.map(s => ({ ...s, content: s.content.trim() }));
+  }
+
+  function importAsNewBlock() {
+    const text = document.getElementById("pasteImportArea").value.trim();
+    if (!text) return;
+    const parsed = parseRawTextToSections(text);
+    sections.push(...parsed);
+    saveSections();
+    renderSections();
+    closeImportModal();
+  }
+
+  function replaceWithPastedText() {
+    const text = document.getElementById("pasteImportArea").value.trim();
+    if (!text) return;
+    sections = parseRawTextToSections(text);
+    saveSections();
+    renderSections();
+    closeImportModal();
+  }
+
+  async function handleFileImport(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    try {
+      if (file.name.toLowerCase().endsWith(".docx")) {
+        const arrayBuffer = await file.arrayBuffer();
+        const result = await mammoth.extractRawText({ arrayBuffer });
+        const parsed = parseRawTextToSections(result.value);
+        if (parsed.length > 0) {
+          sections = parsed;
+          saveSections();
+          renderSections();
+        }
+      } else {
+        const text = await file.text();
+        const parsed = parseRawTextToSections(text);
+        if (parsed.length > 0) {
+          sections = parsed;
+          saveSections();
+          renderSections();
+        }
+      }
+    } catch (err) {
+      alert("Nepodarilo sa načítať súbor: " + err.message);
+    } finally {
+      event.target.value = "";
+    }
+  }
+
+  function downloadTxt() {
+    const out = sections.map(s => {
+      return s.title.toUpperCase() + "\n" + "-".repeat(Math.min(s.title.length, 60)) + "\n" + s.content;
+    }).join("\n\n========================================\n\n");
+
+    const blob = new Blob([out], { type: "text/plain;charset=utf-8" });
+    triggerDownload(blob, "bakalarska_praca.txt");
+  }
+
+  function downloadWordDoc() {
+    const bodyHtml = sections.map((s, idx) => {
+      const tag = s.type === "sub" ? "h2" : "h1";
+      const pageBreak = (s.type === "intro" && idx > 0) || s.type === "main" ? ' style="page-break-before: always;"' : "";
+      const paragraphs = (s.content || "")
+        .split(/\n+/)
+        .map(p => `<p style="text-align: justify; line-height: 1.5; font-size: 12pt; margin: 0 0 10pt 0;">${escapeHtml(p)}</p>`)
+        .join("");
+
+      return `<${tag}${pageBreak} style="font-family: 'Times New Roman', serif;">${escapeHtml(s.title)}</${tag}>${paragraphs}`;
+    }).join("\n");
+
+    const fullHtml = `
+      <html xmlns:o='urn:schemas-microsoft-com:office:office'
+            xmlns:w='urn:schemas-microsoft-com:office:word'
+            xmlns='http://www.w3.org/TR/REC-html40'>
+      <head>
+        <meta charset="utf-8" />
+        <title>Bakalárska práca</title>
+        <style>
+          body { font-family: 'Times New Roman', serif; font-size: 12pt; line-height: 1.5; }
+          h1 { font-size: 16pt; font-weight: bold; margin-top: 18pt; margin-bottom: 12pt; }
+          h2 { font-size: 14pt; font-weight: bold; margin-top: 14pt; margin-bottom: 8pt; }
+        </style>
+      </head>
+      <body>${bodyHtml}</body>
+      </html>
+    `;
+
+    const blob = new Blob(["\ufeff", fullHtml], { type: "application/msword;charset=utf-8" });
+    triggerDownload(blob, "bakalarska_praca.doc");
+  }
+
+  function triggerDownload(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  loadSections();
+  renderSections();
+</script>
+</body>
+</html>
