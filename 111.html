@@ -3,39 +3,44 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Legálny sťahovač HTML (Experiment)</title>
+  <title>Sťahovač verejného HTML – celý náhľad</title>
   <style>
     body {
       font-family: system-ui, -apple-system, sans-serif;
-      max-width: 780px;
-      margin: 40px auto;
+      max-width: 960px;
+      margin: 36px auto;
       padding: 0 16px;
       line-height: 1.5;
       color: #1f2328;
+      background: #f6f8fa;
+    }
+    h1 {
+      margin-bottom: 6px;
     }
     .card {
       border: 1px solid #d0d7de;
       border-radius: 10px;
-      padding: 20px;
-      margin-bottom: 18px;
+      padding: 18px 20px;
+      margin-bottom: 16px;
       background: #ffffff;
     }
     .row {
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
+      align-items: center;
     }
     input[type="url"] {
       flex: 1;
-      min-width: 240px;
+      min-width: 260px;
       padding: 10px 12px;
       font-size: 15px;
       border: 1px solid #d0d7de;
       border-radius: 6px;
     }
     button {
-      padding: 10px 16px;
-      font-size: 15px;
+      padding: 10px 15px;
+      font-size: 14px;
       font-weight: 600;
       border: none;
       border-radius: 6px;
@@ -47,16 +52,37 @@
       background: #8c959f;
       cursor: not-allowed;
     }
-    button.secondary {
+    button.green {
       background: #1a7f37;
+    }
+    button.gray {
+      background: #57606a;
     }
     .notice {
       font-size: 13px;
-      color: #57606a;
-      background: #f6f8fa;
-      padding: 12px;
-      border-radius: 6px;
+      color: #424a53;
+      background: #eef4ff;
+      padding: 12px 14px;
+      border-radius: 8px;
       border-left: 4px solid #0969da;
+    }
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .meta-box {
+      background: #f6f8fa;
+      border: 1px solid #e5e9ef;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 13px;
+    }
+    .meta-box strong {
+      display: block;
+      color: #57606a;
+      margin-bottom: 2px;
     }
     .status {
       margin-top: 12px;
@@ -68,53 +94,92 @@
     .status.ok {
       color: #1a7f37;
     }
-    pre {
-      background: #f6f8fa;
-      padding: 12px;
-      border-radius: 6px;
-      overflow-x: auto;
-      max-height: 280px;
-      font-size: 13px;
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+    textarea.code-view {
+      width: 100%;
+      min-height: 440px;
+      box-sizing: border-box;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 12.5px;
+      line-height: 1.45;
+      padding: 14px;
+      border: 1px solid #d0d7de;
+      border-radius: 8px;
+      background: #0d1117;
+      color: #e6edf3;
+      resize: vertical;
     }
   </style>
 </head>
 <body>
   <h1>Sťahovač verejného HTML</h1>
-  <p>Zadaj odkaz na verejne dostupnú stránku. Nástroj stiahne jej zdrojové HTML a pripraví ho na uloženie.</p>
+  <p>Zadaj verejný odkaz, skontroluj celý prijatý HTML kód a prípadne si ho ulož ako súbor.</p>
 
   <div class="notice">
-    <strong>Pravidlá legálneho použitia:</strong> Sťahuj iba verejne dostupné stránky (bez prihlásenia, paywallu a obchádzania ochrany), nepreťažuj servery hromadnými požiadavkami a stiahnutý obsah používaj len na osobné štúdium a testovanie (napr. <code>https://quotes.toscrape.com</code> alebo <code>https://example.com</code>).
+    <strong>Legálne použitie:</strong> Používaj len na verejne dostupné stránky (bez prihlásenia, plateného obsahu a obchádzania ochrany) na osobné štúdium a testovanie. Neposielaj hromadné požiadavky.
   </div>
 
-  <div class="card" style="margin-top: 18px;">
+  <div class="card" style="margin-top: 16px;">
     <label for="urlInput"><strong>Odkaz na stránku (URL):</strong></label>
     <div class="row" style="margin-top: 8px;">
-      <input id="urlInput" type="url" placeholder="https://example.com" required />
-      <button id="fetchBtn" type="button">Načítať HTML</button>
-      <button id="downloadBtn" type="button" class="secondary" disabled>Uložiť ako .html</button>
+      <input id="urlInput" type="url" placeholder="https://quotes.toscrape.com/" required />
+      <button id="fetchBtn" type="button">Načítať celé HTML</button>
+      <button id="downloadBtn" type="button" class="green" disabled>Stiahnuť .html</button>
     </div>
     <div id="status" class="status"></div>
   </div>
 
   <div class="card" id="resultCard" style="display: none;">
-    <p><strong>Názov stránky:</strong> <span id="pageTitle">-</span></p>
-    <p><strong>Veľkosť HTML:</strong> <span id="htmlSize">0</span> znakov</p>
-    <p><strong>Ukážka zdrojového kódu (prvých 2000 znakov):</strong></p>
-    <pre id="preview"></pre>
+    <div class="meta-grid">
+      <div class="meta-box">
+        <strong>Názov (&lt;title&gt;)</strong>
+        <span id="pageTitle">-</span>
+      </div>
+      <div class="meta-box">
+        <strong>Znaky / Riadky</strong>
+        <span id="statsText">-</span>
+      </div>
+      <div class="meta-box">
+        <strong>Spôsob načítania</strong>
+        <span id="sourceMode">-</span>
+      </div>
+      <div class="meta-box">
+        <strong>Znaky v kóde</strong>
+        <span id="codeFlags">-</span>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <strong>Celý prijatý zdrojový kód HTML:</strong>
+      <div class="row">
+        <button id="copyBtn" type="button" class="gray">Kopírovať celý kód</button>
+      </div>
+    </div>
+    <textarea id="fullCode" class="code-view" readonly></textarea>
   </div>
 
   <script>
     const urlInput = document.getElementById("urlInput");
     const fetchBtn = document.getElementById("fetchBtn");
     const downloadBtn = document.getElementById("downloadBtn");
+    const copyBtn = document.getElementById("copyBtn");
     const statusEl = document.getElementById("status");
     const resultCard = document.getElementById("resultCard");
     const pageTitleEl = document.getElementById("pageTitle");
-    const htmlSizeEl = document.getElementById("htmlSize");
-    const previewEl = document.getElementById("preview");
+    const statsTextEl = document.getElementById("statsText");
+    const sourceModeEl = document.getElementById("sourceMode");
+    const codeFlagsEl = document.getElementById("codeFlags");
+    const fullCodeEl = document.getElementById("fullCode");
 
-    let lastHtml = "";
-    let lastFilename = "stranka.html";
+    let currentHtml = "";
+    let currentFilename = "stranka.html";
 
     function setStatus(msg, type = "") {
       statusEl.textContent = msg;
@@ -134,33 +199,51 @@
     }
 
     async function fetchPublicHtml(targetUrl) {
-      // 1. Pokus o priame stiahnutie (funguje, ak stránka povoľuje CORS)
       try {
         const directRes = await fetch(targetUrl);
         if (directRes.ok) {
-          return await directRes.text();
+          return { html: await directRes.text(), mode: "Priamo (CORS povolené)" };
         }
       } catch (_) {
-        // Prehliadač zablokoval priamy prístup kvôli CORS – pokračujeme cez verejné čítacie proxy
+        // Pokračuje cez verejné čítacie proxy
       }
 
-      // 2. Verejné čítacie proxy (číta iba verejne dostupný obsah bez prihlásenia)
       const proxyUrl = "https://api.allorigins.win/get?url=" + encodeURIComponent(targetUrl);
       const proxyRes = await fetch(proxyUrl);
       if (!proxyRes.ok) {
-        throw new Error("Server alebo proxy vrátilo chybu (" + proxyRes.status + ").");
+        throw new Error("Proxy alebo server vrátil chybu (" + proxyRes.status + ").");
       }
       const data = await proxyRes.json();
-      if (!data || !data.contents) {
-        throw new Error("Nepodarilo sa získať obsah stránky.");
+      if (!data || typeof data.contents !== "string") {
+        throw new Error("Nepodarilo sa získať textový obsah stránky.");
       }
-      return data.contents;
+      return { html: data.contents, mode: "Verejné čítacie proxy" };
+    }
+
+    function inspectHtml(htmlText) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(htmlText, "text/html");
+      const title = doc.querySelector("title")?.textContent?.trim() || "(bez názvu)";
+
+      const hasRefresh = Boolean(doc.querySelector('meta[http-equiv="refresh" i]'));
+      const scriptCount = doc.querySelectorAll("script").length;
+      const hasNoscript = Boolean(doc.querySelector("noscript"));
+
+      const flags = [];
+      if (hasRefresh) flags.push("meta refresh");
+      if (hasNoscript) flags.push("noscript");
+      flags.push("script: " + scriptCount);
+
+      return {
+        title,
+        flagsText: flags.join(", ")
+      };
     }
 
     fetchBtn.addEventListener("click", async () => {
       const raw = urlInput.value.trim();
       if (!raw) {
-        setStatus("Zadaj platný odkaz (URL).", "error");
+        setStatus("Zadaj odkaz (URL).", "error");
         return;
       }
 
@@ -168,35 +251,36 @@
       try {
         validUrl = new URL(raw);
         if (!["http:", "https:"].includes(validUrl.protocol)) {
-          throw new Error("Povolené sú len protokoly http alebo https.");
+          throw new Error("Povolené je len http alebo https.");
         }
       } catch {
-        setStatus("Neplatný formát odkazu. Zadaj celý odkaz vrátane https://", "error");
+        setStatus("Neplatný odkaz. Zadaj úplnú adresu vrátane https://", "error");
         return;
       }
 
       fetchBtn.disabled = true;
       downloadBtn.disabled = true;
       resultCard.style.display = "none";
-      lastHtml = "";
-      setStatus("Sťahujem verejné HTML...");
+      currentHtml = "";
+      setStatus("Načítavam celý HTML kód...");
 
       try {
-        const html = await fetchPublicHtml(validUrl.href);
-        lastHtml = html;
-        lastFilename = makeSafeFilename(validUrl.href);
+        const { html, mode } = await fetchPublicHtml(validUrl.href);
+        currentHtml = html;
+        currentFilename = makeSafeFilename(validUrl.href);
 
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, "text/html");
-        const title = doc.querySelector("title")?.textContent?.trim() || "(bez názvu)";
+        const info = inspectHtml(html);
+        const lineCount = html.split(/\r\n|\r|\n/).length;
 
-        pageTitleEl.textContent = title;
-        htmlSizeEl.textContent = html.length.toLocaleString("sk-SK");
-        previewEl.textContent = html.slice(0, 2000);
+        pageTitleEl.textContent = info.title;
+        statsTextEl.textContent = `${html.length.toLocaleString("sk-SK")} znakov / ${lineCount.toLocaleString("sk-SK")} riadkov`;
+        sourceModeEl.textContent = mode;
+        codeFlagsEl.textContent = info.flagsText;
+        fullCodeEl.value = html;
 
         resultCard.style.display = "block";
         downloadBtn.disabled = false;
-        setStatus("Hotovo! HTML je pripravené na uloženie.", "ok");
+        setStatus("Hotovo! Zobrazuje sa celé prijaté HTML.", "ok");
       } catch (err) {
         setStatus("Chyba: " + err.message, "error");
       } finally {
@@ -204,13 +288,25 @@
       }
     });
 
+    copyBtn.addEventListener("click", async () => {
+      if (!currentHtml) return;
+      try {
+        await navigator.clipboard.writeText(currentHtml);
+        setStatus("Celý HTML kód bol skopírovaný do schránky.", "ok");
+      } catch {
+        fullCodeEl.select();
+        document.execCommand("copy");
+        setStatus("Kód označený / skopírovaný.", "ok");
+      }
+    });
+
     downloadBtn.addEventListener("click", () => {
-      if (!lastHtml) return;
-      const blob = new Blob([lastHtml], { type: "text/html;charset=utf-8" });
+      if (!currentHtml) return;
+      const blob = new Blob([currentHtml], { type: "text/html;charset=utf-8" });
       const blobUrl = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = blobUrl;
-      a.download = lastFilename;
+      a.download = currentFilename;
       document.body.appendChild(a);
       a.click();
       a.remove();
